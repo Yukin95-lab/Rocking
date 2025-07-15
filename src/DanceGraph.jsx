@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import ForceGraph2D from 'react-force-graph-2d';
 
 // Liste des pas de danse (nœuds)
@@ -41,11 +41,11 @@ export default function DanceGraph() {
       <ForceGraph2D
         graphData={{ nodes, links }}
         nodeAutoColorBy="id"
-        nodeLabel={null} // on va gérer l'affichage manuellement
-        linkDirectionalArrowLength={6}
+        nodeLabel={null}
+        linkDirectionalArrowLength={18}            // ← taille de la flèche augmentée
         linkDirectionalArrowRelPos={1}
-        linkWidth={2}
-        linkColor={() => "#444"}
+        linkWidth={2.5}                             // ← épaisseur du lien
+        linkColor={() => "#333"}
         backgroundColor="#ffffff"
         onNodeClick={(node) => setHighlightNode(node.id)}
         nodeCanvasObjectMode={() => 'after'}
@@ -57,10 +57,10 @@ export default function DanceGraph() {
           ctx.textBaseline = 'middle';
           ctx.fillStyle = '#000';
 
-          // Draw the text label
+          // Texte du nœud
           ctx.fillText(label, node.x, node.y + 14);
 
-          // Draw a larger node circle
+          // Cercle visible
           ctx.beginPath();
           ctx.arc(node.x, node.y, 8, 0, 2 * Math.PI, false);
           ctx.fillStyle = node.color || '#888';
