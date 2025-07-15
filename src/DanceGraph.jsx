@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import ForceGraph2D from 'react-force-graph-2d';
 
 // Liste des pas de danse (nœuds)
 const nodes = [
@@ -7,8 +8,9 @@ const nodes = [
   "Flashdance", "bras croisés", "Araignée", "Indécis", "tour accroupi", "double bras croisés",
   "Tombé hanche", "Macarena", "Coucou inversé", "tomber cabas", "Tap tap", "enroulé", "double enroulé",
   "Chevalier", "Spock", "Tout", "Bras croisés"
-];
+].map((id) => ({ id }));
 
+// Transitions entre les pas (liens)
 const links = [
   { source: "Nuque", target: "Passage sous le bras" },
   { source: "Noeud", target: "Corbeille" },
@@ -32,70 +34,51 @@ const links = [
 ];
 
 export default function DanceGraph() {
-  const [selectedStep, setSelectedStep] = useState(null);
-
-  const nextSteps = selectedStep
-    ? links
-        .filter(link => link.source === selectedStep)
-        .map(link => link.target)
-    : [];
+  const [highlightNode, setHighlightNode] = useState(null);
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "sans-serif", background: "#fff", minHeight: "100vh", color: "black" }}>
-      {!selectedStep ? (
-        <>
-          <h2 style={{ color: "black" }}>Liste des pas de danse</h2>
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {nodes.map((step) => (
-              <li key={step}>
-                <button
-                  onClick={() => setSelectedStep(step)}
-                  style={{
-                    padding: "10px 16px",
-                    margin: "8px",
-                    border: "1px solid #ccc",
-                    borderRadius: "8px",
-                    backgroundColor: "#f8f8f8",
-                    cursor: "pointer",
-                    color: "black" // Met en noir le texte des nodes
-                  }}
-                >
-                  {step}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : (
-        <>
-          <h2 style={{ color: "black" }}>Pas sélectionné : {selectedStep}</h2>
-          {nextSteps.length > 0 ? (
-            <>
-              <p>Transitions possibles :</p>
-              <ul>
-                {nextSteps.map((next) => (
-                  <li key={next}>
-                    <strong>{selectedStep}</strong> → {next}
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : (
-            <p>Aucune transition connue pour ce pas.</p>
-          )}
-          <button
-            onClick={() => setSelectedStep(null)}
-            style={{
-              marginTop: "1rem",
-              padding: "10px 16px",
-              background: "#eee",
-              borderRadius: "6px",
-              border: "1px solid #ccc"
-            }}
-          >
-            Revenir à la liste
-          </button>
-        </>
+    <div style={{ width: "100%", height: "100vh", background: "#fff", position: "relative" }}>
+      <ForceGraph2D
+        graphData={{ nodes, links }}
+        nodeAutoColorBy="id"
+        nodeLabel={null}
+        linkDirectionalArrowLength={18}            // ← taille de la flèche augmentée
+        linkDirectionalArrowRelPos={1}
+        linkWidth={2.5}                             // ← épaisseur du lien
+        linkColor={() => "#333"}
+        backgroundColor="#ffffff"
+        onNodeClick={(node) => setHighlightNode(node.id)}
+        nodeCanvasObjectMode={() => 'after'}
+        nodeCanvasObject={(node, ctx, globalScale) => {
+          const label = node.id;
+          const fontSize = 12 / globalScale;
+          ctx.font = `${fontSize}px Sans-Serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = '#000';
+
+          // Texte du nœud
+          ctx.fillText(label, node.x, node.y + 14);
+
+          // Cercle visible
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, 8, 0, 2 * Math.PI, false);
+          ctx.fillStyle = node.color || '#888';
+          ctx.fill();
+        }}
+      />
+      {highlightNode && (
+        <div style={{
+          position: "absolute",
+          top: 10,
+          left: 10,
+          background: "white",
+          padding: "10px",
+          borderRadius: "8px",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.2)"
+        }}>
+          <strong>Pas sélectionné :</strong> {highlightNode}
+        </div>
       )}
     </div>
   );
