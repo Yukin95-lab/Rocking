@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { ForceGraph2D } from "react-force-graph";
+import React, { useState, useRef, useEffect } from "react";
+import ForceGraph2D from 'react-force-graph-2d';
 
 // Liste des pas de danse (nœuds)
 const nodes = [
@@ -37,14 +37,35 @@ export default function DanceGraph() {
   const [highlightNode, setHighlightNode] = useState(null);
 
   return (
-    <div style={{ width: "100%", height: "100vh" }}>
+    <div style={{ width: "100%", height: "100vh", background: "#fff", position: "relative" }}>
       <ForceGraph2D
         graphData={{ nodes, links }}
-        nodeLabel="id"
         nodeAutoColorBy="id"
-        onNodeClick={(node) => setHighlightNode(node.id)}
-        linkDirectionalArrowLength={4}
+        nodeLabel={null} // on va gérer l'affichage manuellement
+        linkDirectionalArrowLength={6}
         linkDirectionalArrowRelPos={1}
+        linkWidth={2}
+        linkColor={() => "#444"}
+        backgroundColor="#ffffff"
+        onNodeClick={(node) => setHighlightNode(node.id)}
+        nodeCanvasObjectMode={() => 'after'}
+        nodeCanvasObject={(node, ctx, globalScale) => {
+          const label = node.id;
+          const fontSize = 12 / globalScale;
+          ctx.font = `${fontSize}px Sans-Serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = '#000';
+
+          // Draw the text label
+          ctx.fillText(label, node.x, node.y + 14);
+
+          // Draw a larger node circle
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, 8, 0, 2 * Math.PI, false);
+          ctx.fillStyle = node.color || '#888';
+          ctx.fill();
+        }}
       />
       {highlightNode && (
         <div style={{
